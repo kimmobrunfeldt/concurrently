@@ -25,7 +25,7 @@ module.exports = (commands, options = {}) => {
         cwd: options.cwd,
         controllers: [
             new LogError({ logger }),
-            new LogOutput({ logger }),
+            new LogOutput({ logger, grid: options.grid }),
             new LogExit({ logger }),
             new InputHandler({
                 logger,
