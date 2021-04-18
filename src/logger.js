@@ -1,16 +1,19 @@
 const chalk = require('chalk');
 const _ = require('lodash');
 const formatDate = require('date-fns/format');
+const Rx = require('rxjs');
 
 const defaults = require('./defaults');
+/** @typedef {import('./command.js')} Command */
 
 module.exports = class Logger {
-    constructor({ outputStream, prefixFormat, prefixLength, raw, timestampFormat }) {
+    constructor({ prefixFormat, prefixLength, raw, timestampFormat }) {
         this.raw = raw;
-        this.outputStream = outputStream;
         this.prefixFormat = prefixFormat;
         this.prefixLength = prefixLength || defaults.prefixLength;
         this.timestampFormat = timestampFormat || defaults.timestampFormat;
+        /** @type {Rx.Subject<{ command: Command, text: string }>} */
+        this.observable = new Rx.Subject();
     }
 
     shortenText(text) {
@@ -76,7 +79,7 @@ module.exports = class Logger {
 
     logCommandText(text, command) {
         const prefix = this.colorText(command, this.getPrefix(command));
-        return this.log(prefix + (prefix ? ' ' : ''), text);
+        return this.log(prefix + (prefix ? ' ' : ''), text, command);
     }
 
     logGlobalEvent(text) {
@@ -84,12 +87,12 @@ module.exports = class Logger {
             return;
         }
 
-        this.log(chalk.gray.dim('-->') + ' ', chalk.gray.dim(text) + '\n');
+        this.log(chalk.gray.dim('-->') + ' ', chalk.gray.dim(text) + '\n', null);
     }
 
-    log(prefix, text) {
+    log(prefix, text, command) {
         if (this.raw) {
-            return this.outputStream.write(text);
+            return this.emit(command, text);
         }
 
         // #70 - replace some ANSI code that would impact clearing lines
@@ -105,10 +108,18 @@ module.exports = class Logger {
         });
 
         if (!this.lastChar || this.lastChar === '\n') {
-            this.outputStream.write(prefix);
+            this.emit(command, prefix);
         }
 
         this.lastChar = text[text.length - 1];
-        this.outputStream.write(lines.join('\n'));
+        this.emit(command, lines.join('\n'));
+    }
+
+    /**
+     * @param {Command} command 
+     * @param {string} text 
+     */
+    emit(command, text) {
+        this.observable.next({ command, text });
     }
 };

@@ -55,6 +55,10 @@ const args = yargs
             describe: 'Disables colors from logging',
             type: 'boolean'
         },
+        'group': {
+            describe: 'Order the output as if the commands were run sequentially.',
+            type: 'boolean'
+        },
 
         // Kill others
         'k': {
@@ -133,7 +137,7 @@ const args = yargs
                 'Can be either the index or the name of the process.'
         }
     })
-    .group(['m', 'n', 'name-separator', 'raw', 's', 'no-color'], 'General')
+    .group(['m', 'n', 'name-separator', 'raw', 's', 'no-color', 'group'], 'General')
     .group(['p', 'c', 'l', 't'], 'Prefix styling')
     .group(['i', 'default-input-target'], 'Input handling')
     .group(['k', 'kill-others-on-fail'], 'Killing other processes')
@@ -167,7 +171,8 @@ concurrently(args._.map((command, index) => {
     restartDelay: args.restartAfter,
     restartTries: args.restartTries,
     successCondition: args.success,
-    timestampFormat: args.timestampFormat
+    timestampFormat: args.timestampFormat,
+    group: args.group
 }).then(
     () => process.exit(0),
     () => process.exit(1)
