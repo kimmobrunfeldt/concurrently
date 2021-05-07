@@ -19,6 +19,7 @@ module.exports = class Command {
         this.close = new Rx.Subject();
         this.stdout = new Rx.Subject();
         this.stderr = new Rx.Subject();
+        this.exited = false;
     }
 
     start() {
@@ -32,6 +33,7 @@ module.exports = class Command {
         });
         Rx.fromEvent(child, 'close').subscribe(([exitCode, signal]) => {
             this.process = undefined;
+            this.exited = true;
             this.close.next({
                 command: {
                     command: this.command,
