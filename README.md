@@ -175,6 +175,18 @@ Restarting
       --restart-after  Delay time to respawn the process, in milliseconds.
                                                            [number] [default: 0]
 
+shorten command
+  -P, --prepend  prepend string to each command
+                 but make sure you not using dash, else use
+                 `-D prepend="foobar"`                    [string] [default: ""]
+  -A, --append   append string to each command
+                 eg: pass arguments
+                 but make sure you not using dash, else use
+                 `-D append="foobar"`                     [string] [default: ""]
+  -D, --define   add definition to render
+                 template `{{prepend}} <command> {{append}}`
+                                                          [string] [default: []]
+
 Options:
   -h, --help         Show help                                         [boolean]
   -v, -V, --version  Show version number                               [boolean]
@@ -192,6 +204,19 @@ Examples:
  - Custom prefix
 
      $ concurrently --prefix "{time}-{pid}" "npm run watch" "http-server"
+
+ - Custom cmd prepend
+
+     $ concurrently -P 'npm run' 'example:echo:A' 'example:echo:B'
+
+     $ concurrently -D prepend='npm run' 'example:echo:A' 'example:echo:B'
+
+ - Custom cmd append
+
+     $ concurrently -A ' -- --watch' 'npm:example:echo*'
+     # Add one space to prevent yargs parse this string as an option
+
+     $ concurrently -D append='-- --watch' 'npm:example:echo*'
 
  - Custom names and colored prefixes
 

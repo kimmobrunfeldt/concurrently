@@ -133,6 +133,38 @@ const args = yargs
                 'Identifier for child process to which input on stdin ' +
                 'should be sent if not specified at start of input.\n' +
                 'Can be either the index or the name of the process.'
+        },
+
+        // shorten command
+        'P': {
+            alias: 'prepend',
+            describe: 
+                'prepend string to each command\n' +
+                'but make sure you not using dash, else use \n' +
+                '`-D prepend="foobar"`',
+            default: '',
+            type: 'string'
+        },
+        'A': {
+            alias: 'append',
+            describe:
+                'append string to each command\n' + 
+                'eg: pass arguments\n' +
+                'but make sure you not using dash, else use \n' +
+                '`-D append="foobar"`', 
+            default: '',
+            type: 'string'
+        },
+
+        // force to use `-D A=B` style
+        // to prevent yargs mis-parsed dash, eg: `--append --watch`
+        'D': {
+            alias: 'define',
+            describe: 
+                'add definition to render \n' + 
+                'template `{{prepend}} <command> {{append}}`',
+            default: [],
+            type: 'string'
         }
     })
     .group(['m', 'n', 'name-separator', 'raw', 's', 'no-color'], 'General')
@@ -140,6 +172,7 @@ const args = yargs
     .group(['i', 'default-input-target'], 'Input handling')
     .group(['k', 'kill-others-on-fail'], 'Killing other processes')
     .group(['restart-tries', 'restart-after'], 'Restarting')
+    .group(['P', 'A', 'D'], 'shorten command')
     // Too much text to write as JS strings, .txt file is better
     .epilogue(fs.readFileSync(__dirname + '/epilogue.txt', { encoding: 'utf8' }))
     .argv;
@@ -147,12 +180,32 @@ const args = yargs
 const prefixColors = args.prefixColors.split(',');
 const names = (args.names || '').split(args.nameSeparator);
 
+const _ObjectFromEntries = (l) => {
+    const d = {};
+    l.forEach(el=>d[el[0]] = el[1]);
+    return d;
+};
+const _define = Array.isArray(args.define) ? args.define : [args.define];
+const definition = Object.assign(
+    {}, 
+    { prepend: args.prepend, append: args.append },
+    // desc: convert ["a=1","b=2"] into {"a":"1","b":"2"}
+    _ObjectFromEntries(
+        _define
+            .map(el=>el.split('='))
+            .map(x=>[x[0],x.slice(1).join('=')])
+    )
+);
+
 let lastColor;
 concurrently(args._.map((command, index) => {
     // Use documented behaviour of repeating last colour when specifying more commands than colours
     lastColor = prefixColors[index] || lastColor;
     return {
         command,
+        argPend: {
+            definition
+        },
         prefixColor: lastColor,
         name: names[index]
     };
