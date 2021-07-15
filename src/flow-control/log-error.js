@@ -1,10 +1,8 @@
 const { of } = require('rxjs');
 
-module.exports = class LogExit {
-    constructor({ logger }) {
-        this.logger = logger;
-    }
+const BaseHandler = require('./base-handler');
 
+module.exports = class LogExit extends BaseHandler {
     handle(commands) {
         commands.forEach(command => command.error.subscribe(event => {
             this.logger.logCommandEvent(

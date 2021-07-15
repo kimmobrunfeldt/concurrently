@@ -1,9 +1,12 @@
 const _ = require('lodash');
 const { filter, map } = require('rxjs/operators');
 
-module.exports = class KillOthers {
+const BaseHandler = require('./base-handler');
+
+module.exports = class KillOthers extends BaseHandler {
     constructor({ logger, conditions }) {
-        this.logger = logger;
+        super({ logger });
+
         this.conditions = _.castArray(conditions);
     }
 

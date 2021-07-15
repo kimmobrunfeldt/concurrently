@@ -1,8 +1,11 @@
 const { map } = require('rxjs/operators');
 
+const BaseHandler = require('./base-handler');
 
-module.exports = class KillOnSignal {
+module.exports = class KillOnSignal extends BaseHandler {
     constructor({ process }) {
+        super();
+
         this.process = process;
     }
 
