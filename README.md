@@ -1,2 +1,1 @@
-# concurrently
-Moved under github.com/open-npm-tools/concurrently
+Maintenance moved to github.com/open-npm-tools/concurrently.
