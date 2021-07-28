@@ -1,1 +1,1 @@
-Maintenance moved to github.com/open-npm-tools/concurrently.
+Maintenance moved to https://github.com/open-npm-tools/concurrently.
