@@ -1,1 +1,1 @@
-Maintenance moved to https://github.com/open-npm-tools/concurrently.
+Maintenance moved to https://github.com/open-cli-tools/concurrently.
